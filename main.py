@@ -4,15 +4,17 @@ from pydantic import BaseModel
 from io import BytesIO
 from PIL import Image
 from transformers import pipeline
+from fastapi.responses import StreamingResponse
 
 app = FastAPI()
 
-# Настройка CORS
+# Указываем домены, с которых разрешены запросы
 origins = [
     "https://rt-dun.vercel.app",  # URL твоего фронтенда
-    "https://your-frontend-project.vercel.app",  # Если у тебя несколько фронтендов
+    "https://your-frontend-project.vercel.app",  # Другие домены, если они есть
 ]
 
+# Добавляем CORS middleware для обработки запросов с других доменов
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  # Разрешить запросы с этих доменов
@@ -36,5 +38,6 @@ async def generate_image(prompt: Prompt):
     byte_io = BytesIO()
     image.save(byte_io, "PNG")
     byte_io.seek(0)
-    
+
     return StreamingResponse(byte_io, media_type="image/png")
+
